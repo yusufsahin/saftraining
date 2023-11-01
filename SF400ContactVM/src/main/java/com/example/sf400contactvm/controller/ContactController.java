@@ -17,6 +17,7 @@ public class ContactController {
     @GetMapping("/contacts")
     @ResponseBody
     public String getContacts() {
+
         return contactService.getContactsAsString();
     }
 
