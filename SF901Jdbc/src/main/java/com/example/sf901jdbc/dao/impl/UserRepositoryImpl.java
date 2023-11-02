@@ -23,7 +23,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User save(User user) {
-        final String INSERT_SQL = "INSERT INTO users(username, email, firstname, lastname, phonenumber) VALUES (?, ?, ?, ?, ?)";
+        final String INSERT_SQL = "INSERT INTO users(username, email, firstname, lastname, phonenumber,picurl) VALUES (?, ?, ?, ?, ?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(
@@ -35,6 +35,7 @@ public class UserRepositoryImpl implements UserRepository {
                         ps.setString(3, user.getFirstname());
                         ps.setString(4, user.getLastname());
                         ps.setString(5, user.getPhonenumber());
+                        ps.setString(5, user.getPicurl());
                         return ps;
                     }
                 },
@@ -48,7 +49,7 @@ public class UserRepositoryImpl implements UserRepository {
         Long newUserId = keyHolder.getKey().longValue();
 
         // Yeni User nesnesi oluşturun.
-        return new User(newUserId, user.getUsername(), user.getEmail(), user.getFirstname(), user.getLastname(), user.getPhonenumber());
+        return new User(newUserId, user.getUsername(), user.getEmail(), user.getFirstname(), user.getLastname(), user.getPhonenumber(), user.getPicurl());
     }
 
 
@@ -63,7 +64,8 @@ public class UserRepositoryImpl implements UserRepository {
                             rs.getString("email"),
                             rs.getString("firstname"),
                             rs.getString("lastname"),
-                            rs.getString("phonenumber")
+                            rs.getString("phonenumber"),
+                            rs.getString("picurl")
                     ));
             return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException e) {
@@ -81,7 +83,8 @@ public class UserRepositoryImpl implements UserRepository {
                         rs.getString("email"),
                         rs.getString("firstname"),
                         rs.getString("lastname"),
-                        rs.getString("phonenumber")
+                        rs.getString("phonenumber"),
+                        rs.getString("picurl")
                 ));
     }
 
@@ -93,7 +96,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void update(User user) {
-        String sql = "UPDATE users SET username=?, email=?, firstname=?, lastname=?, phonenumber=? WHERE id=?";
-        jdbcTemplate.update(sql, user.getUsername(), user.getEmail(), user.getFirstname(), user.getLastname(), user.getPhonenumber(), user.getId());
+        String sql = "UPDATE users SET username=?, email=?, firstname=?, lastname=?, phonenumber=?,picurl=? WHERE id=?";
+        jdbcTemplate.update(sql, user.getUsername(), user.getEmail(), user.getFirstname(), user.getLastname(), user.getPhonenumber(), user.getPicurl(),user.getId());
     }
 }
