@@ -5,8 +5,14 @@ import com.example.sf901jdbc.dao.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,10 +23,34 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User save(User user) {
-        String sql = "INSERT INTO users (username, email, firstname, lastname, phonenumber) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getPhoneNumber());
-        return user;
+        final String INSERT_SQL = "INSERT INTO users(username, email, firstname, lastname, phonenumber) VALUES (?, ?, ?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(
+                new PreparedStatementCreator() {
+                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                        PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[]{"id"});
+                        ps.setString(1, user.getUsername());
+                        ps.setString(2, user.getEmail());
+                        ps.setString(3, user.getFirstname());
+                        ps.setString(4, user.getLastname());
+                        ps.setString(5, user.getPhonenumber());
+                        return ps;
+                    }
+                },
+                keyHolder);
+
+        // ID'nin düzgün bir şekilde alınıp alınmadığını kontrol edin.
+        if (keyHolder.getKey() == null || keyHolder.getKey().longValue() == 0) {
+            throw new IllegalStateException("Insertion failed, no ID obtained.");
+        }
+
+        Long newUserId = keyHolder.getKey().longValue();
+
+        // Yeni User nesnesi oluşturun.
+        return new User(newUserId, user.getUsername(), user.getEmail(), user.getFirstname(), user.getLastname(), user.getPhonenumber());
     }
+
 
     @Override
     public Optional<User> findById(Long id) {
@@ -64,6 +94,6 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void update(User user) {
         String sql = "UPDATE users SET username=?, email=?, firstname=?, lastname=?, phonenumber=? WHERE id=?";
-        jdbcTemplate.update(sql, user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getId());
+        jdbcTemplate.update(sql, user.getUsername(), user.getEmail(), user.getFirstname(), user.getLastname(), user.getPhonenumber(), user.getId());
     }
 }
