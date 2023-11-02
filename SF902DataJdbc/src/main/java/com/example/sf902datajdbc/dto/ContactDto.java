@@ -1,17 +1,13 @@
-package com.example.sf902datajdbc.dao.model;
+package com.example.sf902datajdbc.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-@Table("contacts")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Contact {
-    @Id
+public class ContactDto {
     private Long id;
     private String firstname;
     private String lastname;
